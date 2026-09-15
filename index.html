@@ -8,7 +8,6 @@
 </head>
 <body>
 
-    <!-- Target custom pointer element anchor -->
     <div id="custom-pointer"></div>
 
     <div class="dashboard-wrapper">
@@ -100,7 +99,6 @@
                 </div>
             </div>
             <div class="canvas-box">
-                <!-- Background visual particle node grid renderer overlay -->
                 <canvas id="telemetry-chart"></canvas>
             </div>
         </div>
@@ -141,6 +139,8 @@
         </div>
     </div>
 
+    <!-- Script dependency pipeline loading order -->
     <script src="app.js"></script>
+    <script src="gadgets.js"></script>
 </body>
 </html>
