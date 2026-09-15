@@ -1,128 +1,114 @@
-const logOutput = document.getElementById('log-output');
+const consoleElement = document.getElementById('console-output');
+const canvas = document.getElementById('telemetry-chart');
+const ctx = canvas.getContext('2d');
 
-// Utility to append timestamps onto runtime events log area
-function appendLog(message) {
-    const timestamp = new Date().toLocaleTimeString();
-    logOutput.innerText = `[${timestamp}] ${message}\n` + logOutput.innerText;
+// Data tracking configuration lists
+const maxDataPoints = 30;
+const historyLog = {
+    latency: Array(maxDataPoints).fill(0),
+    memory: Array(maxDataPoints).fill(0)
+};
+
+function writeLog(message) {
+    const stamp = new Date().toISOString().slice(11, 19);
+    consoleElement.innerText = `[${stamp}] ${message}\n` + consoleElement.innerText;
 }
 
-// Gathers passive, non-sensitive hardware signatures
-function evaluateEnvironment() {
-    // Processors Core Check
-    document.getElementById('cpu-val').innerText = navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} Logical Threads` : 'Restricted';
-    
-    // RAM Bounds Estimation
-    document.getElementById('ram-val').innerText = navigator.deviceMemory ? `≥ ${navigator.deviceMemory} GB` : 'Restricted';
-    
-    // Screen Resolution Pipeline
-    document.getElementById('res-val').innerText = `${window.screen.width} × ${window.screen.height} (${window.devicePixelRatio || 1}x)`;
-    
-    // Core Link/Network Evaluation
-    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    let netText = navigator.onLine ? 'Online' : 'Offline';
-    if (connection && connection.effectiveType) {
-        netText += ` (${connection.effectiveType.toUpperCase()})`;
-    }
-    document.getElementById('net-val').innerText = netText;
+function clearConsoleLog() {
+    consoleElement.innerText = `[${new Date().toISOString().slice(11, 19)}] Log trail emptied manually.`;
+}
 
-    // WebGL Engine (GPU) Render Fingerprint
-    try {
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-        if (gl) {
-            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-            if (debugInfo) {
-                const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-                document.getElementById('gpu-val').innerText = renderer || "Generic WebGL Canvas";
-            } else {
-                document.getElementById('gpu-val').innerText = "Context Unmasked Context Empty";
-            }
-        } else {
-            document.getElementById('gpu-val').innerText = "Unsupported Engine Context";
-        }
-    } catch (e) {
-        document.getElementById('gpu-val').innerText = "Blocked Context Access";
-    }
+// Resizes canvas display variables cleanly
+function resizeCanvas() {
+    canvas.width = canvas.parentElement.clientWidth;
+    canvas.height = canvas.parentElement.clientHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
 
-    // Battery Monitor Engine Call
-    if (navigator.getBattery) {
-        navigator.getBattery().then(battery => {
-            function updateBatteryDisplay() {
-                const percentage = Math.round(battery.level * 100);
-                const chargingState = battery.charging ? "Charging" : "Discharging";
-                document.getElementById('battery-val').innerText = `${percentage}% (${chargingState})`;
-            }
-            updateBatteryDisplay();
-            battery.addEventListener('levelchange', updateBatteryDisplay);
-            battery.addEventListener('chargingchange', updateBatteryDisplay);
-        }).catch(() => {
-            document.getElementById('battery-val').innerText = "Permission Blocked";
-        });
+// Standard loop checking internal connection attributes
+function evaluateStaticMetrics() {
+    const link = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (link) {
+        document.getElementById('network-val').innerText = `${link.downlink || '0'} Mbps (${link.effectiveType ? link.effectiveType.toUpperCase() : 'N/A'})`;
     } else {
-        document.getElementById('battery-val').innerText = "API Unsupported";
+        document.getElementById('network-val').innerText = navigator.onLine ? "Online (Standard Link)" : "Offline";
     }
 }
 
-// Active explicit prompt handling triggers
-function requestLocation() {
-    if (!navigator.geolocation) {
-        appendLog('Error: Geolocation API unsupported on this browser engine instance.');
-        return;
+// Calculations metric checking loop
+function collectDynamicTelemetry() {
+    // 1. Measuring Loop Render Latency Deltas
+    const startTime = performance.now();
+    requestAnimationFrame(() => {
+        const loopDelta = (performance.now() - startTime).toFixed(1);
+        document.getElementById('latency-val').innerText = `${loopDelta} ms`;
+        
+        // Push delta record directly into historical logging arrays
+        historyLog.latency.shift();
+        historyLog.latency.push(parseFloat(loopDelta));
+    });
+
+    // 2. Memory Consumption (Supported natively in Chromium-based engines)
+    if (performance && performance.memory) {
+        const usedMegaBytes = (performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(1);
+        const limitMegaBytes = Math.round(performance.memory.jsHeapSizeLimit / 1024 / 1024);
+        
+        document.getElementById('memory-val').innerText = `${usedMegaBytes} MB`;
+        document.getElementById('memory-limit-val').innerText = `${limitMegaBytes} MB`;
+
+        historyLog.memory.shift();
+        historyLog.memory.push(parseFloat(usedMegaBytes));
+    } else {
+        document.getElementById('memory-val').innerText = "Unsupported";
+        document.getElementById('memory-limit-val').innerText = "Restricted Context";
     }
-    appendLog('Triggered system request: Geolocation telemetry permissions...');
-    navigator.geolocation.getCurrentPosition(
-        pos => appendLog(`Success: Coords established at [${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}]`),
-        err => appendLog(`Rejected: Geolocation access was denied (${err.message})`)
-    );
+
+    renderTelemetryGraph();
 }
 
-async function requestMedia() {
-    if (!navigator.mediaDevices?.getUserMedia) {
-        appendLog('Error: MediaDevices capture mechanism unsupported.');
-        return;
-    }
-    appendLog('Triggered system request: Media device hardware capture permissions...');
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        appendLog('Success: Media capture validation successful.');
-        stream.getTracks().forEach(track => track.stop());
-    } catch (err) {
-        appendLog(`Rejected: Hardware capture context denied (${err.message})`);
-    }
-}
+// Custom graphing engine built natively inside standard HTML5 Canvas layouts
+function renderTelemetryGraph() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    const widthStep = canvas.width / (maxDataPoints - 1);
+    const height = canvas.height;
 
-async function requestUSB() {
-    if (!navigator.usb) {
-        appendLog('Error: WebUSB interface unsupported.');
-        return;
-    }
-    appendLog('Triggered system interface lookup: Initializing target USB device scan...');
-    try {
-        const device = await navigator.usb.requestDevice({ filters: [] });
-        appendLog(`Success: USB aligned -> ${device.productName || 'Unnamed Device'} (Vendor: ${device.vendorId})`);
-    } catch (err) {
-        appendLog(`Rejected: Interface alignment cancelled (${err.message})`);
-    }
-}
+    // Calculate maximum limits to correctly scale visualization ratios
+    const maxLatency = Math.max(...historyLog.latency, 30); 
+    const maxMemory = Math.max(...historyLog.memory, 100);
 
-async function requestHID() {
-    if (!navigator.hid) {
-        appendLog('Error: WebHID layout interface unsupported.');
-        return;
-    }
-    appendLog('Triggered system interface lookup: Initializing peripheral HID layout prompt...');
-    try {
-        const devices = await navigator.hid.requestDevice({ filters: [] });
-        if (devices.length > 0) {
-            appendLog(`Success: Peripheral HID established -> ${devices[0].productName}`);
-        } else {
-            appendLog('Status: Prompt dismissed without selecting an item.');
+    // Render Data Stream Lines helper
+    function drawStream(dataList, maxVal, lineStrokeColor) {
+        ctx.beginPath();
+        ctx.strokeStyle = lineStrokeColor;
+        ctx.lineWidth = 2;
+        ctx.lineJoin = 'round';
+
+        for (let i = 0; i < dataList.length; i++) {
+            const xCoordinate = i * widthStep;
+            // Inverts tracking coordinates safely because canvas zeroes start at top left bounds
+            const yCoordinate = height - ((dataList[i] / maxVal) * (height - 20)) - 10;
+            
+            if (i === 0) {
+                ctx.moveTo(xCoordinate, yCoordinate);
+            } else {
+                ctx.lineTo(xCoordinate, yCoordinate);
+            }
         }
-    } catch (err) {
-        appendLog(`Rejected: Peripheral alignment cancelled (${err.message})`);
+        ctx.stroke();
     }
+
+    // Call graphic rendering arrays
+    drawStream(historyLog.memory, maxMemory, '#30d158'); // Memory Line Graph (Green)
+    drawStream(historyLog.latency, maxLatency, '#2997ff'); // Latency Line Graph (Blue)
 }
 
-// Run initial calculations on load
-evaluateEnvironment();
-
+// Core execution loops setup configuration
+evaluateStaticMetrics();
+setInterval(collectDynamicTelemetry, 1000);
+setInterval(() => {
+    if(historyLog.memory[maxDataPoints - 1] > 0) {
+        writeLog(`Telemetry cycle active. Heap usage logged at ${historyLog.memory[maxDataPoints - 1]} MB.`);
+    }
+}, 10000);
