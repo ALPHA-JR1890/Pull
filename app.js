@@ -1,114 +1,205 @@
-const consoleElement = document.getElementById('console-output');
+const consoleElement = document.getElementById('audit-console');
 const canvas = document.getElementById('telemetry-chart');
 const ctx = canvas.getContext('2d');
 
-// Data tracking configuration lists
-const maxDataPoints = 30;
-const historyLog = {
-    latency: Array(maxDataPoints).fill(0),
-    memory: Array(maxDataPoints).fill(0)
+const maxPoints = 40;
+const runLogs = {
+    latency: Array(maxPoints).fill(0),
+    memory: Array(maxPoints).fill(0)
 };
 
-function writeLog(message) {
-    const stamp = new Date().toISOString().slice(11, 19);
-    consoleElement.innerText = `[${stamp}] ${message}\n` + consoleElement.innerText;
+function writeAuditLog(message) {
+    const time = new Date().toISOString().slice(11, 19);
+    consoleElement.innerText = `[${time}] ${message}\n` + consoleElement.innerText;
 }
 
-function clearConsoleLog() {
-    consoleElement.innerText = `[${new Date().toISOString().slice(11, 19)}] Log trail emptied manually.`;
+function purgeConsoleLogs() {
+    consoleElement.innerText = `[${new Date().toISOString().slice(11, 19)}] Audit ledger console purged cleanly.`;
 }
 
-// Resizes canvas display variables cleanly
-function resizeCanvas() {
+function exportAuditLedger() {
+    const dataUri = "data:text/plain;charset=utf-8," + encodeURIComponent(consoleElement.innerText);
+    const anchor = document.createElement('a');
+    anchor.setAttribute("href", dataUri);
+    anchor.setAttribute("download", `system_audit_ledger_${Date.now()}.txt`);
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+}
+
+function configureCanvasResolution() {
     canvas.width = canvas.parentElement.clientWidth;
     canvas.height = canvas.parentElement.clientHeight;
 }
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
+window.addEventListener('resize', configureCanvasResolution);
+configureCanvasResolution();
 
-// Standard loop checking internal connection attributes
-function evaluateStaticMetrics() {
+function sampleStaticHardwareMetrics() {
+    document.getElementById('cpu-cores').innerText = navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} Cores` : 'Restricted';
+    document.getElementById('display-pipeline').innerText = `${window.screen.width}×${window.screen.height} (${window.devicePixelRatio || 1}x)`;
+    
     const link = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
     if (link) {
-        document.getElementById('network-val').innerText = `${link.downlink || '0'} Mbps (${link.effectiveType ? link.effectiveType.toUpperCase() : 'N/A'})`;
+        document.getElementById('net-rtt').innerText = link.rtt ? `${link.rtt} ms RTT` : 'No Ping';
     } else {
-        document.getElementById('network-val').innerText = navigator.onLine ? "Online (Standard Link)" : "Offline";
+        document.getElementById('net-rtt').innerText = 'N/A';
     }
+
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+            const tempCtx = new AudioContext();
+            document.getElementById('audio-rate').innerText = `${tempCtx.sampleRate} Hz`;
+            tempCtx.close();
+        }
+    } catch(e) { document.getElementById('audio-rate').innerText = 'Blocked'; }
+
+    syncStorageViews();
 }
 
-// Calculations metric checking loop
-function collectDynamicTelemetry() {
-    // 1. Measuring Loop Render Latency Deltas
-    const startTime = performance.now();
+function runRealtimeExecutionMonitor() {
+    // 1. Calculate Sandboxed Thread Processing Latency
+    const sampleStart = performance.now();
     requestAnimationFrame(() => {
-        const loopDelta = (performance.now() - startTime).toFixed(1);
-        document.getElementById('latency-val').innerText = `${loopDelta} ms`;
+        const frameLatencyDelta = (performance.now() - sampleStart).toFixed(1);
+        document.getElementById('thread-latency').innerText = `${frameLatencyDelta} ms`;
         
-        // Push delta record directly into historical logging arrays
-        historyLog.latency.shift();
-        historyLog.latency.push(parseFloat(loopDelta));
+        runLogs.latency.shift();
+        runLogs.latency.push(parseFloat(frameLatencyDelta));
     });
 
-    // 2. Memory Consumption (Supported natively in Chromium-based engines)
+    // 2. Sample Memory Allocations (Supported in Chromium / ChromeOS Engine Layers)
     if (performance && performance.memory) {
-        const usedMegaBytes = (performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(1);
-        const limitMegaBytes = Math.round(performance.memory.jsHeapSizeLimit / 1024 / 1024);
+        const currentHeap = (performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(1);
+        const maxHeapLimit = Math.round(performance.memory.jsHeapSizeLimit / 1024 / 1024);
         
-        document.getElementById('memory-val').innerText = `${usedMegaBytes} MB`;
-        document.getElementById('memory-limit-val').innerText = `${limitMegaBytes} MB`;
+        document.getElementById('heap-used').innerText = `${currentHeap} MB`;
+        document.getElementById('heap-limit').innerText = `${maxHeapLimit} MB`;
 
-        historyLog.memory.shift();
-        historyLog.memory.push(parseFloat(usedMegaBytes));
+        runLogs.memory.shift();
+        runLogs.memory.push(parseFloat(currentHeap));
     } else {
-        document.getElementById('memory-val').innerText = "Unsupported";
-        document.getElementById('memory-limit-val').innerText = "Restricted Context";
+        document.getElementById('heap-used').innerText = 'Chromium Only';
+        document.getElementById('heap-limit').innerText = 'Restricted';
     }
 
-    renderTelemetryGraph();
+    plotDualAxisChart();
 }
 
-// Custom graphing engine built natively inside standard HTML5 Canvas layouts
-function renderTelemetryGraph() {
+function plotDualAxisChart() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    const widthStep = canvas.width / (maxDataPoints - 1);
-    const height = canvas.height;
+    const segmentWidth = canvas.width / (maxPoints - 1);
+    const canvasHeight = canvas.height;
 
-    // Calculate maximum limits to correctly scale visualization ratios
-    const maxLatency = Math.max(...historyLog.latency, 30); 
-    const maxMemory = Math.max(...historyLog.memory, 100);
+    const topLatency = Math.max(...runLogs.latency, 25);
+    const topMemory = Math.max(...runLogs.memory, 80);
 
-    // Render Data Stream Lines helper
-    function drawStream(dataList, maxVal, lineStrokeColor) {
+    function traceLine(dataArray, limitVal, colorHex) {
         ctx.beginPath();
-        ctx.strokeStyle = lineStrokeColor;
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = colorHex;
+        ctx.lineWidth = 2.5;
         ctx.lineJoin = 'round';
 
-        for (let i = 0; i < dataList.length; i++) {
-            const xCoordinate = i * widthStep;
-            // Inverts tracking coordinates safely because canvas zeroes start at top left bounds
-            const yCoordinate = height - ((dataList[i] / maxVal) * (height - 20)) - 10;
+        for (let i = 0; i < dataArray.length; i++) {
+            const x = i * segmentWidth;
+            const y = canvasHeight - ((dataArray[i] / limitVal) * (canvasHeight - 30)) - 15;
             
-            if (i === 0) {
-                ctx.moveTo(xCoordinate, yCoordinate);
-            } else {
-                ctx.lineTo(xCoordinate, yCoordinate);
-            }
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
         }
         ctx.stroke();
     }
 
-    // Call graphic rendering arrays
-    drawStream(historyLog.memory, maxMemory, '#30d158'); // Memory Line Graph (Green)
-    drawStream(historyLog.latency, maxLatency, '#2997ff'); // Latency Line Graph (Blue)
+    traceLine(runLogs.latency, topLatency, '#2997ff'); // Latency Plot (Blue Line)
+    traceLine(runLogs.memory, topMemory, '#30d158');   // Memory Plot (Green Line)
 }
 
-// Core execution loops setup configuration
-evaluateStaticMetrics();
-setInterval(collectDynamicTelemetry, 1000);
-setInterval(() => {
-    if(historyLog.memory[maxDataPoints - 1] > 0) {
-        writeLog(`Telemetry cycle active. Heap usage logged at ${historyLog.memory[maxDataPoints - 1]} MB.`);
+function executeCoreStressBenchmark() {
+    writeAuditLog("Initializing numeric processor calculation loop benchmark test...");
+    const monitorField = document.getElementById('thread-latency');
+    monitorField.innerText = "Stressing...";
+    
+    setTimeout(() => {
+        const start = performance.now();
+        let computeTotal = 0;
+        for (let i = 0; i < 40000000; i++) {
+            computeTotal += Math.sqrt(i) * Math.sin(i);
+        }
+        const delta = (performance.now() - start).toFixed(1);
+        writeAuditLog(`Thread test complete. Duration: ${delta}ms. Checksum: ${Math.round(computeTotal)}`);
+    }, 40);
+}
+
+function syncStorageViews() {
+    try { document.getElementById('local-storage-status').innerText = `${Object.keys(localStorage).length} Keys`; } catch(e) {}
+    try { document.getElementById('session-storage-status').innerText = `${Object.keys(sessionStorage).length} Keys`; } catch(e) {}
+}
+
+function commitStorageRecord(type) {
+    const key = `sandbox_metric_${Math.floor(Math.random() * 1000)}`;
+    const value = `stamp_${Date.now()}`;
+    try {
+        if (type === 'local') localStorage.setItem(key, value);
+        else sessionStorage.setItem(key, value);
+        writeAuditLog(`Committed key: [${key}] to domain ${type} storage.`);
+        syncStorageViews();
+    } catch(err) { writeAuditLog(`Storage rejected: ${err.message}`); }
+}
+
+function verifyIndexedDBStore() {
+    const openRequest = indexedDB.open("SystemTelemetryDB", 1);
+    openRequest.onupgradeneeded = (e) => { e.target.result.createObjectStore("records", { autoIncrement: true }); };
+    openRequest.onsuccess = () => {
+        document.getElementById('idb-status').innerText = "Verified Node";
+        writeAuditLog("IndexedDB target store validated successfully.");
+    };
+    openRequest.onerror = () => { writeAuditLog("IndexedDB execution failure."); };
+}
+
+window.addEventListener('deviceorientation', (e) => {
+    if (e.beta !== null) {
+        document.getElementById('gyro-matrix').innerText = `B: ${Math.round(e.beta)}° / G: ${Math.round(e.gamma)}°`;
     }
-}, 10000);
+});
+
+function requestGeolocationTelemetry() {
+    if (!navigator.geolocation) return writeAuditLog("Geolocation API unavailable.");
+    writeAuditLog("Triggering high-precision coordinate request modal...");
+    navigator.geolocation.getCurrentPosition(
+        p => writeAuditLog(`Approved: Coords locked at [${p.coords.latitude.toFixed(4)}, ${p.coords.longitude.toFixed(4)}]`),
+        err => writeAuditLog(`Denied: Request prompt rejected (${err.message})`)
+    );
+}
+
+async function requestMediaHardwareStream() {
+    if (!navigator.mediaDevices?.getUserMedia) return writeAuditLog("Media API unavailable.");
+    writeAuditLog("Triggering hardware capture initialization request...");
+    try {
+        const trackStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+        writeAuditLog("Approved: Connection to camera/mic matrix active.");
+        trackStream.getTracks().forEach(t => t.stop());
+    } catch(err) { writeAuditLog(`Denied: Access refused (${err.message})`); }
+}
+
+async function requestUSBDeviceAccess() {
+    if (!navigator.usb) return writeAuditLog("WebUSB API unsupported.");
+    writeAuditLog("Triggering client hardware USB selector overlay...");
+    try {
+        const device = await navigator.usb.requestDevice({ filters: [] });
+        writeAuditLog(`Approved: Device handshake successful: ${device.productName || 'Device'}`);
+    } catch(err) { writeAuditLog(`Cancelled: Selector dismissed (${err.message})`); }
+}
+
+async function requestHIDDeviceAccess() {
+    if (!navigator.hid) return writeAuditLog("WebHID API unsupported.");
+    writeAuditLog("Triggering device mapping interface selection view...");
+    try {
+        const inputs = await navigator.hid.requestDevice({ filters: [] });
+        writeAuditLog(inputs.length ? `Approved: Connected input -> ${inputs[0].productName}` : "Dismissed: Interface prompt cleared empty.");
+    } catch(err) { writeAuditLog(`Cancelled: Input registration terminated (${err.message})`); }
+}
+
+// Start Processing Loops
+sampleStaticHardwareMetrics();
+setInterval(runRealtimeExecutionMonitor, 1000);
