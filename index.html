@@ -3,57 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telemetry Matrix Dashboard</title>
+    <title>Omni Telemetry Framework</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="dashboard-container">
+    <div class="dashboard-wrapper">
         <header class="app-header">
-            <h1>System Intelligence Matrix</h1>
-            <p>Real-time sandbox performance benchmarks and diagnostic analytics</p>
+            <h1>Omni-Telemetry Framework</h1>
+            <p>Advanced diagnostic metrics and capability evaluation mesh</p>
         </header>
 
-        <!-- Metric Cards Grid -->
+        <!-- SECTION 1: HARDWARE & ENVIRONMENT TELEMETRY -->
+        <div class="panel-title">Hardware Architecture & Engine Environment</div>
         <div class="metrics-grid">
             <div class="metric-card">
-                <label>Processing Latency</label>
-                <div class="metric-value" id="latency-val">0.0 ms</div>
+                <label>Processing Core Count</label>
+                <div class="metric-value" id="cpu-cores">Checking...</div>
             </div>
             <div class="metric-card">
-                <label>Heap Memory Usage</label>
-                <div class="metric-value" id="memory-val">Checking...</div>
+                <label>Allocated JS Heap Memory</label>
+                <div class="metric-value" id="heap-used">Checking...</div>
             </div>
             <div class="metric-card">
-                <label>Estimated Memory Limit</label>
-                <div class="metric-value" id="memory-limit-val">Checking...</div>
+                <label>JS Heap Memory Limit</label>
+                <div class="metric-value" id="heap-limit">Checking...</div>
             </div>
             <div class="metric-card">
-                <label>Network Link Velocity</label>
-                <div class="metric-value" id="network-val">Checking...</div>
+                <label>Execution Thread Latency</label>
+                <div class="metric-value" id="thread-latency">0.0 ms</div>
+            </div>
+            <div class="metric-card">
+                <label>Active Display Pipeline</label>
+                <div class="metric-value" id="display-pipeline">Checking...</div>
+            </div>
+            <div class="metric-card">
+                <label>Network Round Trip Time</label>
+                <div class="metric-value" id="net-rtt">Checking...</div>
+            </div>
+            <div class="metric-card">
+                <label>Device Orientation Matrix</label>
+                <div class="metric-value" id="gyro-matrix">Static Node</div>
+            </div>
+            <div class="metric-card">
+                <label>Audio Node Hardware Rate</label>
+                <div class="metric-value" id="audio-rate">Checking...</div>
             </div>
         </div>
 
-        <!-- Visualization Graphs -->
-        <div class="visualization-section">
-            <div class="graph-container">
-                <div class="graph-header">
-                    <h3>Performance Timeline (Last 30 Seconds)</h3>
-                    <span class="legend-indicator">Green = Memory (MB) | Blue = Latency (ms)</span>
+        <!-- SECTION 2: GRAPH VISUALIZATION SUITE -->
+        <div class="panel-title">Real-Time Analytical Visualization</div>
+        <div class="graph-panel">
+            <div class="graph-header">
+                <h3>Thread Latency vs Memory Allocation Timeline</h3>
+                <div class="graph-legend">
+                    <span class="legend-item blue">Thread Latency (ms)</span>
+                    <span class="legend-item green">Heap Memory (MB)</span>
                 </div>
-                <div class="canvas-wrapper">
-                    <canvas id="telemetry-chart"></canvas>
-                </div>
+            </div>
+            <div class="canvas-box">
+                <canvas id="telemetry-chart"></canvas>
+            </div>
+            <div class="benchmark-bar">
+                <button class="action-btn" onclick="executeCoreStressBenchmark()">Run CPU Thread Benchmark Loop</button>
             </div>
         </div>
 
-        <!-- Event Logging Console -->
-        <div class="console-section">
-            <div class="console-header">
-                <h3>Runtime Event Log Ledger</h3>
-                <button class="btn-clear" onclick="clearConsoleLog()">Purge Log</button>
+        <!-- SECTION 3: STORAGE BOUNDARY SANDBOXES -->
+        <div class="panel-title">Isolate Origin Storage Subsystems</div>
+        <div class="storage-grid">
+            <div class="storage-card">
+                <label>LocalStorage Sandbox</label>
+                <div class="storage-value" id="local-storage-status">0 Keys</div>
+                <button class="action-btn sm" onclick="commitStorageRecord('local')">Commit Row</button>
             </div>
-            <div class="console-output" id="console-output">System telemetry diagnostics online...</div>
+            <div class="storage-card">
+                <label>SessionStorage Sandbox</label>
+                <div class="storage-value" id="session-storage-status">0 Keys</div>
+                <button class="action-btn sm" onclick="commitStorageRecord('session')">Commit Row</button>
+            </div>
+            <div class="storage-card">
+                <label>IndexedDB Node Link</label>
+                <div class="storage-value" id="idb-status">Unlinked</div>
+                <button class="action-btn sm" onclick="verifyIndexedDBStore()">Verify Store</button>
+            </div>
+        </div>
+
+        <!-- SECTION 4: PERMISSION GATEWAYS -->
+        <div class="panel-title">Hardware Layer Capability Request Gateways</div>
+        <div class="gateways-grid">
+            <div class="gateway-card">
+                <h4>High-Precision Geolocation</h4>
+                <p>Queries geographic positioning parameters via native hardware controllers.</p>
+                <button class="action-btn" onclick="requestGeolocationTelemetry()">Authorize Location</button>
+            </div>
+            <div class="gateway-card">
+                <h4>Media Capture Streams</h4>
+                <p>Requests system tokens for microphone and camera component channel routing.</p>
+                <button class="action-btn" onclick="requestMediaHardwareStream()">Authorize Capture</button>
+            </div>
+            <div class="gateway-card">
+                <h4>WebUSB Interconnect Bus</h4>
+                <p>Launches hardware selector panel targeting client universal serial bus interfaces.</p>
+                <button class="action-btn" onclick="requestUSBDeviceAccess()">Enumerate USB Bus</button>
+            </div>
+            <div class="gateway-card">
+                <h4>WebHID Input Array</h4>
+                <p>Queries connection protocols targeting attached human interface device items.</p>
+                <button class="action-btn" onclick="requestHIDDeviceAccess()">Enumerate Input Array</button>
+            </div>
+        </div>
+
+        <!-- SECTION 5: AUDIT TRAIL LOGGING -->
+        <div class="panel-title">Runtime Event Audit Trail</div>
+        <div class="console-panel">
+            <div class="console-controls">
+                <button class="action-btn sm" onclick="exportAuditLedger()">Export Audit Log (.txt)</button>
+                <button class="action-btn sm danger" onclick="purgeConsoleLogs()">Purge Log</button>
+            </div>
+            <div class="console-box" id="audit-console">System logging active. Safe sandboxed diagnostics initialized.</div>
         </div>
     </div>
 
