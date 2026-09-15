@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Intelligence</title>
+    <style>
+        :root {
+            --bg-color: #000000;
+            --card-bg: rgba(255, 255, 255, 0.04);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #f5f5f7;
+            --text-secondary: #86868b;
+            --accent: #2997ff;
+            --accent-hover: #0077ed;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 60px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        header h1 {
+            font-size: 40px;
+            font-weight: 600;
+            letter-spacing: -0.005em;
+            margin-bottom: 12px;
+            background: linear-gradient(180deg, #ffffff 0%, #a1a1a6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            font-size: 17px;
+            color: var(--text-secondary);
+        }
+
+        .section-title {
+            font-size: 21px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            letter-spacing: 0.011em;
+            margin-top: 32px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        @media(min-width: 600px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 24px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: border-color 0.2s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .card label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 8px;
+        }
+
+        .card .value {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .action-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 980px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            margin-top: 16px;
+            align-self: flex-start;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .log-container {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 24px;
+            margin-top: 32px;
+        }
+
+        .log-output {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            min-height: 80px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>System Intelligence</h1>
+            <p>Advanced sandbox environmental indicators</p>
+        </header>
+
+        <!-- Environment Framework Matrix -->
+        <div class="section-title">Hardware & Performance Framework</div>
+        <div class="grid">
+            <div class="card">
+                <label>Logical Processors</label>
+                <div class="value" id="cpu-val">Checking...</div>
+            </div>
+            <div class="card">
+                <label>Estimated Memory Capacity</label>
+                <div class="value" id="ram-val">Checking...</div>
+            </div>
+            <div class="card">
+                <label>Display Pipeline</label>
+                <div class="value" id="res-val">Checking...</div>
+            </div>
+            <div class="card">
+                <label>Battery Status</label>
+                <div class="value" id="battery-val">Checking...</div>
+            </div>
+            <div class="card">
+                <label>Network Connection State</label>
+                <div class="value" id="net-val">Checking...</div>
+            </div>
+            <div class="card">
+                <label>Graphics Accelerator (GPU)</label>
+                <div class="value" id="gpu-val" style="font-size: 14px;">Checking...</div>
+            </div>
+        </div>
+
+        <!-- Capability Gateway Probes -->
+        <div class="section-title">Permission-Gated Interactions</div>
+        <div class="grid">
+            <div class="card action-card">
+                <div>
+                    <label>Geolocation API</label>
+                    <div class="value" style="font-size: 15px; color: var(--text-secondary);">Query positioning streams via system hardware signals</div>
+                </div>
+                <button class="btn" onclick="requestLocation()">Request Telemetry</button>
+            </div>
+            <div class="card action-card">
+                <div>
+                    <label>Media Capture API</label>
+                    <div class="value" style="font-size: 15px; color: var(--text-secondary);">Request explicit verification access to camera/microphone nodes</div>
+                </div>
+                <button class="btn" onclick="requestMedia()">Request Capture</button>
+            </div>
+            <div class="card action-card">
+                <div>
+                    <label>WebUSB Subsystem</label>
+                    <div class="value" style="font-size: 15px; color: var(--text-secondary);">Query local physical bus controllers for interface alignment</div>
+                </div>
+                <button class="btn" onclick="requestUSB()">Scan Interfaces</button>
+            </div>
+            <div class="card action-card">
+                <div>
+                    <label>WebHID Subsystem</label>
+                    <div class="value" style="font-size: 15px; color: var(--text-secondary);">Query access interfaces to direct human interface hardware nodes</div>
+                </div>
+                <button class="btn" onclick="requestHID()">Scan Inputs</button>
+            </div>
+        </div>
+
+        <!-- Audit Ledger Output Box -->
+        <div class="log-container">
+            <label style="display:block; font-size:12px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px;">Runtime Security Events</label>
+            <div class="log-output" id="log-output">Dashboard ready. Framework sandboxed and operational.</div>
+        </div>
+    </div>
+
+    <!-- Integration Script Resource Links -->
+    <script src="app.js"></script>
+</body>
+</html>
+
