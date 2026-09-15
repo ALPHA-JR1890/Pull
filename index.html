@@ -3,93 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Omni Telemetry Framework</title>
+    <title>Sandbox Simulation Matrix</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+    <!-- Target custom pointer element anchor -->
+    <div id="custom-pointer"></div>
+
     <div class="dashboard-wrapper">
         <header class="app-header">
-            <h1>Omni-Telemetry Framework</h1>
-            <p>Advanced diagnostic metrics and capability evaluation mesh</p>
+            <h1>Sandbox Matrix Playground</h1>
+            <p>Advanced real-time structural simulation and diagnostic canvas mesh</p>
         </header>
 
-        <!-- SECTION 1: HARDWARE & ENVIRONMENT TELEMETRY -->
-        <div class="panel-title">Hardware Architecture & Engine Environment</div>
+        <!-- CUSTOMIZATION ENGINE CONTROLLER -->
+        <div class="panel-title">Interface Theme & Custom Pointer Configuration</div>
+        <div class="control-panel grid-3">
+            <div class="control-group">
+                <label>Matrix Accent Color Tint</label>
+                <input type="color" id="theme-color-picker" value="#2997ff">
+            </div>
+            <div class="control-group">
+                <label>Pointer Node Modification Style</label>
+                <select id="pointer-style-selector">
+                    <option value="default">Default OS Pointer</option>
+                    <option value="quantum">Quantum Dynamic Aura</option>
+                    <option value="precision">Crosshair Precision Dot</option>
+                    <option value="stealth">Ghost Light Trail</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Ambient Simulation Grid Speed</label>
+                <input type="range" id="particle-speed-slider" min="1" max="15" value="4">
+            </div>
+        </div>
+
+        <!-- STRUCTURAL TELEMETRY NODES -->
+        <div class="panel-title">Active Chrono, Energy & Kinematics Diagnostics</div>
         <div class="metrics-grid">
             <div class="metric-card">
-                <label>Processing Core Count</label>
+                <label>Energy Cell Capacity</label>
+                <div class="metric-value" id="battery-percent">Checking...</div>
+            </div>
+            <div class="metric-card">
+                <label>Cell State Tracker</label>
+                <div class="metric-value" id="battery-state">Checking...</div>
+            </div>
+            <div class="metric-card">
+                <label>Local System Chrono</label>
+                <div class="metric-value" id="local-time">00:00:00</div>
+            </div>
+            <div class="metric-card">
+                <label>X-Y Interaction Coordinate</label>
+                <div class="metric-value" id="pointer-coordinates">X: 0 | Y: 0</div>
+            </div>
+            <div class="metric-card">
+                <label>Logical Thread Count</label>
                 <div class="metric-value" id="cpu-cores">Checking...</div>
             </div>
             <div class="metric-card">
-                <label>Allocated JS Heap Memory</label>
-                <div class="metric-value" id="heap-used">Checking...</div>
-            </div>
-            <div class="metric-card">
-                <label>JS Heap Memory Limit</label>
-                <div class="metric-value" id="heap-limit">Checking...</div>
-            </div>
-            <div class="metric-card">
-                <label>Execution Thread Latency</label>
+                <label>Processor Thread Latency</label>
                 <div class="metric-value" id="thread-latency">0.0 ms</div>
-            </div>
-            <div class="metric-card">
-                <label>Active Display Pipeline</label>
-                <div class="metric-value" id="display-pipeline">Checking...</div>
-            </div>
-            <div class="metric-card">
-                <label>Network Round Trip Time</label>
-                <div class="metric-value" id="net-rtt">Checking...</div>
-            </div>
-            <div class="metric-card">
-                <label>Device Orientation Matrix</label>
-                <div class="metric-value" id="gyro-matrix">Static Node</div>
-            </div>
-            <div class="metric-card">
-                <label>Audio Node Hardware Rate</label>
-                <div class="metric-value" id="audio-rate">Checking...</div>
             </div>
         </div>
 
-        <!-- SECTION 2: GRAPH VISUALIZATION SUITE -->
-        <div class="panel-title">Real-Time Analytical Visualization</div>
+        <!-- HIGH INTERACTION INTERACTIVE GADGETRY -->
+        <div class="panel-title">Interactive Hardware Simulators & Audio Gadgets</div>
+        <div class="gadget-grid grid-2">
+            <div class="gadget-card">
+                <h4>Frequency Oscillator Modulator</h4>
+                <p>Generates low-level synthesizer audio waves safely inside a temporary browser context node.</p>
+                <div class="button-row">
+                    <button class="action-btn" onclick="triggerAudioPulse(440, 'sine')">Play 440Hz Sine</button>
+                    <button class="action-btn" onclick="triggerAudioPulse(220, 'triangle')">Play 220Hz Triangle</button>
+                </div>
+            </div>
+            <div class="gadget-card">
+                <h4>Sandbox Environment Stressor Array</h4>
+                <p>Spawns high-concurrency calculation matrix calculations to test client thread latency thresholds.</p>
+                <div class="button-row">
+                    <button class="action-btn execution-trigger" onclick="executeCoreStressBenchmark()">Run Standard Stress Test</button>
+                    <button class="action-btn execution-trigger danger" onclick="triggerHyperStressLoop()">Run 10s Matrix Stress Loop</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- REALTIME GRAPH VISUALIZATION SUITE -->
+        <div class="panel-title">Real-Time Continuous Analytics Timeline</div>
         <div class="graph-panel">
             <div class="graph-header">
-                <h3>Thread Latency vs Memory Allocation Timeline</h3>
+                <h3>Thread Processing Deltas vs Virtual Heap Allocations</h3>
                 <div class="graph-legend">
-                    <span class="legend-item blue">Thread Latency (ms)</span>
-                    <span class="legend-item green">Heap Memory (MB)</span>
+                    <span class="legend-item blue" id="legend-latency">Thread Latency (ms)</span>
+                    <span class="legend-item green" id="legend-memory">Heap Memory (MB)</span>
                 </div>
             </div>
             <div class="canvas-box">
+                <!-- Background visual particle node grid renderer overlay -->
                 <canvas id="telemetry-chart"></canvas>
             </div>
-            <div class="benchmark-bar">
-                <button class="action-btn" onclick="executeCoreStressBenchmark()">Run CPU Thread Benchmark Loop</button>
-            </div>
         </div>
 
-        <!-- SECTION 3: STORAGE BOUNDARY SANDBOXES -->
-        <div class="panel-title">Isolate Origin Storage Subsystems</div>
-        <div class="storage-grid">
-            <div class="storage-card">
-                <label>LocalStorage Sandbox</label>
-                <div class="storage-value" id="local-storage-status">0 Keys</div>
-                <button class="action-btn sm" onclick="commitStorageRecord('local')">Commit Row</button>
-            </div>
-            <div class="storage-card">
-                <label>SessionStorage Sandbox</label>
-                <div class="storage-value" id="session-storage-status">0 Keys</div>
-                <button class="action-btn sm" onclick="commitStorageRecord('session')">Commit Row</button>
-            </div>
-            <div class="storage-card">
-                <label>IndexedDB Node Link</label>
-                <div class="storage-value" id="idb-status">Unlinked</div>
-                <button class="action-btn sm" onclick="verifyIndexedDBStore()">Verify Store</button>
-            </div>
-        </div>
-
-        <!-- SECTION 4: PERMISSION GATEWAYS -->
+        <!-- HARDWARE PROBES -->
         <div class="panel-title">Hardware Layer Capability Request Gateways</div>
         <div class="gateways-grid">
             <div class="gateway-card">
@@ -114,14 +130,14 @@
             </div>
         </div>
 
-        <!-- SECTION 5: AUDIT TRAIL LOGGING -->
-        <div class="panel-title">Runtime Event Audit Trail</div>
+        <!-- AUDIT LOG LEDGER -->
+        <div class="panel-title">Sandbox Event Audit Trail Ledger</div>
         <div class="console-panel">
             <div class="console-controls">
                 <button class="action-btn sm" onclick="exportAuditLedger()">Export Audit Log (.txt)</button>
                 <button class="action-btn sm danger" onclick="purgeConsoleLogs()">Purge Log</button>
             </div>
-            <div class="console-box" id="audit-console">System logging active. Safe sandboxed diagnostics initialized.</div>
+            <div class="console-box" id="audit-console">System simulation mesh online. Environmental components sandbox verified.</div>
         </div>
     </div>
 
